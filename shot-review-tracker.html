@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shot Review Tracker</title>
+<style>
+:root{
+  color-scheme: light;
+  --red:#D33834; --black:#0D0D0D; --sand:#DADED0; --grey2:#F2F4F5; --grey3:#BDBEBA;
+  --grey5:#747976; --success:#45CEAC; --error:#E96760; --blue:#07B2CF; --yellow:#FEAC34;
+  --line:#E3E2DE;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--black);background:var(--grey2);font-size:14px;line-height:1.45}
+.wrap{max-width:1120px;margin:0 auto;padding:20px}
+header.top{display:flex;align-items:center;gap:14px;border-bottom:3px solid var(--red);padding-bottom:14px}
+.logo{width:40px;height:40px;border-radius:8px;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:18px;flex:0 0 auto}
+h1{font-size:20px;margin:0}
+.sub{color:var(--grey5);font-size:12.5px;margin-top:2px}
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:14px 0 4px}
+.btn{padding:9px 16px;border-radius:8px;border:1px solid var(--black);background:var(--black);color:#fff;font-size:13px;font-weight:bold;cursor:pointer}
+.btn:hover{background:#000}
+.btn.ghost{background:#fff;color:var(--black)}
+.btn.ghost:hover{background:var(--grey2)}
+.filestat{font-size:12.5px;color:var(--grey5)}
+.filestat b{color:var(--black)}
+.err{color:var(--error);font-size:12.5px;font-weight:bold}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 18px}
+.tab{padding:8px 14px;border-radius:20px;background:#fff;border:1px solid var(--grey3);cursor:pointer;font-size:13px;white-space:nowrap}
+.tab:hover{border-color:var(--grey5)}
+.tab.active{background:var(--black);color:#fff;border-color:var(--black)}
+.tab .badge{display:inline-block;min-width:18px;text-align:center;margin-left:6px;padding:0 5px;border-radius:9px;background:var(--grey2);color:var(--grey5);font-size:11px;font-weight:bold}
+.tab.active .badge{background:#fff;color:var(--black)}
+.panel{display:none}
+.panel.active{display:block}
+h2.sec{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--red);margin:22px 0 10px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.card .n{font-size:26px;font-weight:bold}
+.card .l{font-size:12px;color:var(--grey5);margin-top:2px}
+.card.sub{background:var(--grey2)}
+.card.accent-red{border-left:4px solid var(--red)}
+.card.accent-yellow{border-left:4px solid var(--yellow)}
+.card.accent-success{border-left:4px solid var(--success)}
+.card.accent-blue{border-left:4px solid var(--blue)}
+.rate .p{font-size:28px;font-weight:bold}
+.rate .l{font-size:12px;color:var(--grey5);margin:2px 0 8px}
+.rate .bar{height:6px;border-radius:4px;background:var(--grey2);overflow:hidden}
+.rate .bar>span{display:block;height:100%;border-radius:4px}
+.rate .den{font-size:10.5px;color:var(--grey5);margin-top:6px}
+.searchbar{margin:8px 0 12px}
+.searchbar input{width:100%;max-width:340px;padding:8px 11px;border:1px solid var(--grey3);border-radius:8px;font-size:13px}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:12px}
+th{background:var(--black);color:#fff;text-align:left;padding:9px 10px;font-weight:bold;white-space:nowrap;position:sticky;top:0}
+td{padding:7px 10px;border-top:1px solid var(--line);color:#222;white-space:nowrap}
+.tblwrap{max-height:60vh;overflow:auto;border-radius:10px}
+.empty td{text-align:center;color:var(--grey5);padding:34px;font-style:italic;white-space:normal}
+.legend{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 12px}
+.chip{font-size:11px;padding:3px 9px;border-radius:12px;font-weight:bold;display:inline-block}
+.chip.acc{background:#DCF7EF;color:#1c7a63}
+.chip.rej{background:#FBE1DF;color:#a5312b}
+.chip.nr{background:#FFEACD;color:#8a5a12}
+.chip.plate{background:#DCF7EF;color:#1c7a63}
+.chip.vfx{background:#D8F1F6;color:#0a6d80}
+.chip.ns{background:#EDEBFF;color:#5b4bb0}
+.chip.blank{background:var(--grey2);color:var(--grey5)}
+.tablecap{font-size:12.5px;color:var(--grey5);margin:2px 0 10px}
+.htu h3{color:var(--red);font-size:13px;margin:18px 0 6px}
+.htu p{margin:5px 0}.htu .muted{color:var(--grey5);font-size:12.5px}
+.htu ol{margin:6px 0 6px 18px;padding:0}.htu li{margin:4px 0}
+footer{margin:26px 0 8px;color:var(--grey5);font-size:11.5px;text-align:center;border-top:1px solid var(--line);padding-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="logo">SR</div>
+    <div>
+      <h1>Shot Review Tracker</h1>
+      <div class="sub">Shot-by-shot review status · load a CSV to populate, or explore the sample data below</div>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <button class="btn" id="loadBtn">Load review CSV</button>
+    <button class="btn ghost" id="clearBtn" style="display:none">Clear data</button>
+    <button class="btn ghost" id="sampleBtn">Load sample data</button>
+    <input type="file" id="fileInput" accept=".csv,text/csv" style="display:none">
+    <span class="filestat" id="fileStat">No file loaded — showing empty template.</span>
+    <span class="err" id="errStat"></span>
+  </div>
+
+  <nav class="tabs" id="tabs"></nav>
+
+  <section class="panel active" data-tab="Dashboard">
+    <h2 class="sec">Key rates</h2>
+    <div class="cards" id="dashRates"></div>
+    <h2 class="sec">Shot review</h2>
+    <div class="cards" id="dashTS"></div>
+    <p class="tablecap" style="margin-top:14px">Set to plate (auto) = rejected shots + not-started clips. Manual overrides for "Sent to VFX" live outside this viewer.</p>
+    <h2 class="sec">In-context review</h2>
+    <div class="cards" id="dashIC"></div>
+    <p class="tablecap" style="margin-top:14px">In-context review uses a separate CSV (timecode markers) — not loaded in this demo.</p>
+  </section>
+
+  <section class="panel" data-tab="All Shots"></section>
+  <section class="panel" data-tab="Needs Refinement"></section>
+  <section class="panel" data-tab="Set to Plate"></section>
+  <section class="panel" data-tab="Sent to VFX"></section>
+
+  <section class="panel htu" data-tab="How to Use">
+    <h3>Loading a CSV</h3>
+    <p>Click <strong>Load review CSV</strong> and pick an export (an 8-column shot list: Shot ID, Shot Name, timecodes, Character, Clip Status, Review Status). Everything fills in instantly and is remembered next time you open this page.</p>
+    <p class="muted">Or click <strong>Load sample data</strong> to see it populated with mock shots.</p>
+    <h3>The pages</h3>
+    <p><strong>All Shots</strong> — everything in the loaded CSV, searchable.</p>
+    <p><strong>Needs Refinement</strong> — shots with Review Status = NEEDS_REFINEMENT.</p>
+    <p><strong>Set to Plate</strong> — rejected shots + not-started clips, auto-routed.</p>
+    <p><strong>Sent to VFX</strong> — manual-only decisions, shown here for completeness.</p>
+    <h3>Good to know</h3>
+    <p class="muted">• A shot can have two characters with different statuses — each is its own row.<br>
+    • Search boxes filter each table live.<br>
+    • Data stays in your browser (localStorage) — nothing is uploaded anywhere.</p>
+  </section>
+
+  <footer>Shot Review Tracker · in-browser CSV viewer · data stays on your device</footer>
+</div>
+
+<script>
+const SHOTCOLS=["Shot ID","Shot Name","Timecode In","Timecode Out","Character ID","Character Name","Clip Status","Review Status"];
+const LSKEY="shotTrackerCSVv1";
+let DATA=null, FILENAME=null;
+
+const SAMPLE_CSV=`Shot ID,Shot Name,Timecode In,Timecode Out,Character ID,Character Name,Clip Status,Review Status
+SH010,Kitchen intro,00:00:01:00,00:00:04:12,C01,Mira,COMPLETE,ACCEPTED
+SH020,Hallway walk,00:00:05:00,00:00:09:03,C02,Devon,COMPLETE,ACCEPTED
+SH030,Doorway reveal,00:00:10:00,00:00:13:20,C01,Mira,COMPLETE,NEEDS_REFINEMENT
+SH040,Rooftop wide,00:00:14:00,00:00:18:11,C03,Sam,NOT_STARTED,
+SH050,Rooftop close,00:00:18:12,00:00:21:02,C03,Sam,COMPLETE,REJECTED
+SH060,Car interior,00:00:22:00,00:00:25:19,C02,Devon,COMPLETE,ACCEPTED
+SH070,Car exterior,00:00:26:00,00:00:29:07,C04,Priya,COMPLETE,NEEDS_REFINEMENT
+SH080,Cafe two-shot,00:00:30:00,00:00:34:15,C01,Mira,COMPLETE,ACCEPTED
+SH080,Cafe two-shot,00:00:30:00,00:00:34:15,C04,Priya,COMPLETE,NEEDS_REFINEMENT
+SH090,Street crossing,00:00:35:00,00:00:38:09,C02,Devon,NOT_STARTED,
+SH100,Elevator ride,00:00:39:00,00:00:41:22,C03,Sam,COMPLETE,ACCEPTED
+SH110,Lobby wide,00:00:42:00,00:00:46:04,C01,Mira,COMPLETE,NEEDS_REFINEMENT
+SH120,Lobby close,00:00:46:05,00:00:48:18,C04,Priya,COMPLETE,ACCEPTED
+SH130,Stairwell,00:00:49:00,00:00:52:10,C02,Devon,COMPLETE,REJECTED
+SH140,Rooftop night,00:00:53:00,00:00:57:00,C03,Sam,COMPLETE,NEEDS_REFINEMENT
+SH150,Bedroom close,00:00:57:01,00:01:00:12,C01,Mira,COMPLETE,ACCEPTED
+SH160,Bedroom wide,00:01:00:13,00:01:03:20,C01,Mira,NOT_STARTED,
+SH170,Balcony,00:01:04:00,00:01:07:05,C04,Priya,COMPLETE,NEEDS_REFINEMENT
+SH180,Garage,00:01:07:06,00:01:10:19,C02,Devon,COMPLETE,ACCEPTED
+SH190,Bridge wide,00:01:11:00,00:01:14:23,C03,Sam,COMPLETE,NEEDS_REFINEMENT
+SH200,Bridge close,00:01:15:00,00:01:17:14,C03,Sam,COMPLETE,ACCEPTED
+SH210,Subway platform,00:01:18:00,00:01:21:08,C02,Devon,COMPLETE,NEEDS_REFINEMENT
+SH220,Subway car,00:01:21:09,00:01:24:17,C04,Priya,COMPLETE,ACCEPTED
+SH230,Park bench,00:01:25:00,00:01:28:06,C01,Mira,COMPLETE,NEEDS_REFINEMENT
+SH240,Park wide,00:01:28:07,00:01:31:15,C01,Mira,COMPLETE,REJECTED
+SH250,Diner interior,00:01:32:00,00:01:35:09,C03,Sam,COMPLETE,ACCEPTED
+SH260,Diner exterior,00:01:35:10,00:01:38:20,C02,Devon,COMPLETE,NEEDS_REFINEMENT
+SH270,Finale wide,00:01:39:00,00:01:43:00,C04,Priya,COMPLETE,ACCEPTED`;
+
+// ---------- CSV parse ----------
+function parseCSV(text){
+  text=text.replace(/^\uFEFF/,'');
+  const rows=[]; let i=0,f='',row=[],q=false;
+  while(i<text.length){const c=text[i];
+    if(q){ if(c=='"'){ if(text[i+1]=='"'){f+='"';i+=2;continue;} q=false;i++;continue;} f+=c;i++;continue; }
+    if(c=='"'){q=true;i++;continue;}
+    if(c==','){row.push(f);f='';i++;continue;}
+    if(c=='\r'){i++;continue;}
+    if(c=='\n'){row.push(f);rows.push(row);row=[];f='';i++;continue;}
+    f+=c;i++;
+  }
+  if(f.length||row.length){row.push(f);rows.push(row);}
+  return rows.filter(r=>!(r.length===1&&r[0].trim()===''));
+}
+function toObjects(rows){
+  const hdr=rows[0].map(h=>h.trim());
+  if(!hdr.includes("Review Status")||!hdr.includes("Shot Name"))
+    throw new Error("That doesn't look like a shot review CSV (missing Shot Name / Review Status columns).");
+  return rows.slice(1).map(r=>{const o={};hdr.forEach((h,i)=>o[h]=(r[i]||"").trim());return o;})
+             .filter(o=>o["Shot Name"]||o["Shot ID"]);
+}
+
+// ---------- helpers ----------
+const esc=s=>(s==null?"":String(s)).replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
+function statusChip(v){
+  const u=(v||"").toUpperCase();
+  if(u==="ACCEPTED")return '<span class="chip acc">ACCEPTED</span>';
+  if(u==="REJECTED")return '<span class="chip rej">REJECTED</span>';
+  if(u==="NEEDS_REFINEMENT")return '<span class="chip nr">NEEDS_REFINEMENT</span>';
+  if(!v)return '<span class="chip blank">—</span>';
+  return esc(v);
+}
+function clipChip(v){
+  const u=(v||"").toUpperCase();
+  if(u==="NOT_STARTED")return '<span class="chip ns">NOT_STARTED</span>';
+  if(!v)return '<span class="chip blank">—</span>';
+  return esc(v);
+}
+function ptChip(v){
+  if(v==="Set to plate")return '<span class="chip plate">Set to plate (auto)</span>';
+  if(v==="Sent to VFX")return '<span class="chip vfx">Sent to VFX</span>';
+  return '<span class="chip blank">—</span>';
+}
+
+// ---------- derived views ----------
+function rowsFor(page){
+  if(!DATA)return [];
+  if(page==="All Shots")return DATA;
+  if(page==="Needs Refinement")return DATA.filter(o=>(o["Review Status"]||"").toUpperCase()==="NEEDS_REFINEMENT");
+  if(page==="Set to Plate")return DATA.filter(o=>{const h=(o["Review Status"]||"").toUpperCase(),g=(o["Clip Status"]||"").toUpperCase();return h==="REJECTED"||g==="NOT_STARTED";});
+  if(page==="Sent to VFX")return [];
+  return [];
+}
+const PAGECAP={
+  "All Shots":"Every shot in the loaded CSV.",
+  "Needs Refinement":"Shots with Review Status = NEEDS_REFINEMENT.",
+  "Set to Plate":"Auto-routed: rejected shots + not-started clips.",
+  "Sent to VFX":"Manual-only decision — nothing auto-routes here, so this stays empty in the CSV viewer."
+};
+const legend='<div class="legend">'
+  +'<span class="chip acc">ACCEPTED</span><span class="chip rej">REJECTED</span>'
+  +'<span class="chip nr">NEEDS_REFINEMENT</span><span class="chip ns">NOT_STARTED</span>'
+  +'<span class="chip plate">Set to plate</span><span class="chip blank">— blank</span></div>';
+
+function renderPage(page){
+  const panel=document.querySelector('.panel[data-tab="'+page+'"]');
+  const cols=SHOTCOLS.concat(["PT (auto)"]);
+  const rows=rowsFor(page);
+  const sid='search_'+page.replace(/\W/g,'');
+  let html='<h2 class="sec">'+page+'</h2><p class="tablecap">'+PAGECAP[page]+'</p>'+legend;
+  html+='<div class="searchbar"><input type="text" id="'+sid+'" placeholder="Search '+page+'…"></div>';
+  html+='<div class="tblwrap"><table><thead><tr>'+cols.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody id="tb_'+sid+'">';
+  html+=bodyRows(rows,page,cols.length);
+  html+='</tbody></table></div>';
+  panel.innerHTML=html;
+  const inp=document.getElementById(sid);
+  if(inp)inp.addEventListener('input',e=>{
+    const q=e.target.value.toLowerCase();
+    const f=q?rows.filter(o=>SHOTCOLS.some(c=>(o[c]||"").toLowerCase().includes(q))):rows;
+    document.getElementById('tb_'+sid).innerHTML=bodyRows(f,page,cols.length);
+  });
+}
+function bodyRows(rows,page,ncols){
+  if(!DATA)return '<tr class="empty"><td colspan="'+ncols+'">No CSV loaded yet — click "Load review CSV" or "Load sample data" above.</td></tr>';
+  if(!rows.length)return '<tr class="empty"><td colspan="'+ncols+'">No shots match this view'+(page==="Sent to VFX"?' (set these manually elsewhere).':'.')+'</td></tr>';
+  return rows.map(o=>{
+    const auto=((o["Review Status"]||"").toUpperCase()==="REJECTED"||(o["Clip Status"]||"").toUpperCase()==="NOT_STARTED")?"Set to plate":"";
+    return '<tr>'
+      +'<td>'+esc(o["Shot ID"])+'</td><td>'+esc(o["Shot Name"])+'</td>'
+      +'<td>'+esc(o["Timecode In"])+'</td><td>'+esc(o["Timecode Out"])+'</td>'
+      +'<td>'+esc(o["Character ID"])+'</td><td>'+esc(o["Character Name"])+'</td>'
+      +'<td>'+clipChip(o["Clip Status"])+'</td><td>'+statusChip(o["Review Status"])+'</td>'
+      +'<td>'+ptChip(auto)+'</td></tr>';
+  }).join('');
+}
+
+// ---------- dashboard ----------
+function countBy(pred){return DATA?DATA.filter(pred).length:0;}
+function rateCard(label,num,den,denLabel,color){
+  const pct=den>0?(num/den*100):0;
+  const shown=den>0?pct.toFixed(1)+'%':'—';
+  return '<div class="card rate"><div class="p" style="color:'+color+'">'+shown+'</div>'
+    +'<div class="l">'+label+'</div>'
+    +'<div class="bar"><span style="width:'+(den>0?pct:0)+'%;background:'+color+'"></span></div>'
+    +'<div class="den">'+num+' of '+den+' '+denLabel+'</div></div>';
+}
+function renderDash(){
+  const total=DATA?DATA.length:0;
+  const acc=countBy(o=>(o["Review Status"]||"").toUpperCase()==="ACCEPTED");
+  const rej=countBy(o=>(o["Review Status"]||"").toUpperCase()==="REJECTED");
+  const nr=countBy(o=>(o["Review Status"]||"").toUpperCase()==="NEEDS_REFINEMENT");
+  const unrev=total-acc-rej-nr;
+  const reviewed=acc+rej+nr;
+  const plate=countBy(o=>{const h=(o["Review Status"]||"").toUpperCase(),g=(o["Clip Status"]||"").toUpperCase();return h==="REJECTED"||g==="NOT_STARTED";});
+  document.getElementById('dashRates').innerHTML=
+     rateCard("Approval rate",acc,reviewed,"reviewed",getComputedStyle(document.documentElement).getPropertyValue('--success').trim())
+    +rateCard("Needs refinement",nr,reviewed,"reviewed",getComputedStyle(document.documentElement).getPropertyValue('--yellow').trim())
+    +rateCard("Set to plate",plate,total,"shots",getComputedStyle(document.documentElement).getPropertyValue('--red').trim());
+  const ts=[
+    ["Total shots",total,"accent-red"],["Accepted",acc,"accent-success"],["Rejected",rej,""],
+    ["Needs refinement",nr,"accent-yellow"],["Not yet reviewed",unrev<0?0:unrev,""],
+    ["Set to plate (auto)",plate,"sub accent-success"],["Sent to VFX (manual)",0,"sub accent-blue"]
+  ];
+  document.getElementById('dashTS').innerHTML=ts.map(c=>card(c[0],c[1],c[2])).join('');
+  const ic=[["Markers reviewed",0,"accent-blue"],["Shots flagged",0,"accent-yellow"],
+    ["New issue (was accepted)",0,"sub"],["Confirms needs-refinement",0,"sub"],["First review",0,"sub"]];
+  document.getElementById('dashIC').innerHTML=ic.map(c=>card(c[0],c[1],c[2])).join('');
+}
+function card(l,n,cls){return '<div class="card '+cls+'"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>';}
+
+// ---------- tabs ----------
+const ORDER=["Dashboard","All Shots","Needs Refinement","Set to Plate","Sent to VFX","How to Use"];
+function buildTabs(){
+  const nav=document.getElementById('tabs');nav.innerHTML='';
+  ORDER.forEach((name,i)=>{
+    const b=document.createElement('div');b.className='tab'+(i===0?' active':'');
+    let badge='';
+    if(["All Shots","Needs Refinement","Set to Plate"].includes(name))badge=' <span class="badge">'+rowsFor(name).length+'</span>';
+    if(name==="Sent to VFX")badge=' <span class="badge">0</span>';
+    b.innerHTML=name+badge;
+    b.onclick=()=>{document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      b.classList.add('active');document.querySelector('.panel[data-tab="'+name+'"]').classList.add('active');};
+    nav.appendChild(b);
+  });
+}
+
+// ---------- render all ----------
+function renderAll(){
+  renderDash();
+  ["All Shots","Needs Refinement","Set to Plate","Sent to VFX"].forEach(renderPage);
+  buildTabs();
+  const clr=document.getElementById('clearBtn');
+  if(DATA){document.getElementById('fileStat').innerHTML='Loaded <b>'+esc(FILENAME||'CSV')+'</b> · <b>'+DATA.length+'</b> shots';clr.style.display='';}
+  else{document.getElementById('fileStat').textContent='No file loaded — showing empty template.';clr.style.display='none';}
+}
+
+// ---------- events ----------
+document.getElementById('loadBtn').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('fileInput').addEventListener('change',e=>{
+  const file=e.target.files[0];if(!file)return;
+  const err=document.getElementById('errStat');err.textContent='';
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const objs=toObjects(parseCSV(rd.result));
+      if(!objs.length)throw new Error("No shot rows found in that file.");
+      DATA=objs;FILENAME=file.name;
+      try{localStorage.setItem(LSKEY,JSON.stringify({name:FILENAME,data:DATA}));}catch(_){}
+      renderAll();
+    }catch(ex){err.textContent=ex.message;}
+  };
+  rd.readAsText(file);
+  e.target.value='';
+});
+document.getElementById('clearBtn').onclick=()=>{
+  DATA=null;FILENAME=null;try{localStorage.removeItem(LSKEY);}catch(_){}
+  document.getElementById('errStat').textContent='';renderAll();
+};
+document.getElementById('sampleBtn').onclick=()=>{
+  const err=document.getElementById('errStat');err.textContent='';
+  try{
+    const objs=toObjects(parseCSV(SAMPLE_CSV));
+    DATA=objs;FILENAME='sample-shots.csv';
+    try{localStorage.setItem(LSKEY,JSON.stringify({name:FILENAME,data:DATA}));}catch(_){}
+    renderAll();
+  }catch(ex){err.textContent=ex.message;}
+};
+
+// ---------- boot: rehydrate ----------
+(function(){
+  try{const s=localStorage.getItem(LSKEY);if(s){const o=JSON.parse(s);if(o&&o.data&&o.data.length){DATA=o.data;FILENAME=o.name;}}}catch(_){}
+  renderAll();
+})();
+</script>
+</body>
+</html>
