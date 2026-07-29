@@ -1,8 +1,5 @@
 # Shot Review Tracker
 
-<img width="1158" height="772" alt="Screenshot 2026-07-29 at 4 44 01 PM" src="https://github.com/user-attachments/assets/47698378-9cee-4ab4-a103-f11f9d4df93e" />
-
-
 A single-file, in-browser tool for tracking review status across a list
 of shots (or any similar batch-review workflow). Drop in a CSV and get:
 
@@ -17,3 +14,5 @@ your own CSV (columns: Shot ID, Shot Name, Timecode In/Out, Character ID,
 Character Name, Clip Status, Review Status).
 
 Built as a single static HTML file — no build step, no dependencies.
+
+<img width="1158" height="772" alt="Screenshot 2026-07-29 at 4 44 01 PM" src="https://github.com/user-attachments/assets/47698378-9cee-4ab4-a103-f11f9d4df93e" />
