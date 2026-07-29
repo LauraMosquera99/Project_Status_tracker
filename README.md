@@ -1,5 +1,7 @@
 # Shot Review Tracker
 
+Built to explore fast, dependency-free dashboards for CSV-driven workflows.
+
 A single-file, in-browser tool for tracking review status across a list
 of shots (or any similar batch-review workflow). Drop in a CSV and get:
 
